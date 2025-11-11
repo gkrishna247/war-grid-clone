@@ -32,6 +32,7 @@ bg_scroll = 0
 level = 1
 start_game = False
 start_intro = False
+screen_shake = 0
 
 # Game difficulty settings
 PLAYER_SPEED = 5  # Default player speed
@@ -75,6 +76,16 @@ start_img = pygame.image.load('img/start_btn.png').convert_alpha()
 exit_img = pygame.image.load('img/exit_btn.png').convert_alpha()
 restart_img = pygame.image.load('img/restart_btn.png').convert_alpha()
 
+# define colors
+BG = (144, 201, 120)  # background color
+RED=(255,0,0)
+WHITE=(255,255,255)
+GREEN=(0,255,0)
+BLACK=(0,0,0)
+PINK = (235, 65, 54)
+YELLOW = (255, 255, 0)
+ORANGE = (255, 165, 0)
+
 # Create pause/resume button images programmatically if they don't exist
 def create_button_image(text, width, height, color):
     """Create a simple button image with text"""
@@ -116,15 +127,6 @@ item_boxes = {
     'Grenade': grenade_box_img
 }
 
-# define colors
-BG = (144, 201, 120)  # background color
-RED=(255,0,0)
-WHITE=(255,255,255)
-GREEN=(0,255,0)
-BLACK=(0,0,0)
-PINK = (235, 65, 54)
-YELLOW = (255, 255, 0)
-ORANGE = (255, 165, 0)
 
 #define font
 font=pygame.font.SysFont('Futura', 24)
@@ -743,6 +745,9 @@ class Grenade(pygame.sprite.Sprite):
             grenade_fx.play()
             explosion=Explosion(self.rect.x, self.rect.y, 0.5)
             explosion_group.add(explosion)
+            #add screen shake
+            global screen_shake
+            screen_shake = 30
             #do damage to anyone that is nearby
             if abs(self.rect.centerx - player.rect.centerx) < TILE_SIZE * 2 and \
                 abs(self.rect.centery - player.rect.centery) < TILE_SIZE * 2:
@@ -1119,6 +1124,13 @@ while run:
                     grenade = False
                     grenade_thrown = False
 
+
+    # screen shake
+    if screen_shake > 0:
+        screen_shake -= 1
+        s = screen.copy()
+        draw_bg()
+        screen.blit(s, (random.randint(-8, 8), random.randint(-8, 8)))
 
     pygame.display.update()
 
