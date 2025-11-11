@@ -33,12 +33,30 @@ level = 1
 start_game = False
 start_intro = False
 
+# Game difficulty settings
+PLAYER_SPEED = 5  # Default player speed
+PLAYER_JUMP_VELOCITY = -13  # Jump strength (negative = upward)
+ENEMY_DETECTION_RANGE = 150  # How far enemies can see
+PLAYER_SHOOT_COOLDOWN = 15  # Frames between shots (lower = faster)
+
+# Score system
+score = 0
+enemies_killed = 0
+
 # define player action variables
 moving_left = False
 moving_right = False
 shoot = False
 grenade = False
 grenade_thrown = False
+
+# Pause system
+game_paused = False
+
+# Cheat code system
+cheat_input = ""  # Store typed characters
+cheat_active = False  # God mode status
+CHEAT_CODE = "thor"  # The secret code
 
 #load music and sounds
 # pygame.mixer.music.load('audio/music2.mp3')
@@ -56,6 +74,21 @@ grenade_fx.set_volume(0.05)
 start_img = pygame.image.load('img/start_btn.png').convert_alpha()
 exit_img = pygame.image.load('img/exit_btn.png').convert_alpha()
 restart_img = pygame.image.load('img/restart_btn.png').convert_alpha()
+
+# Create pause/resume button images programmatically if they don't exist
+def create_button_image(text, width, height, color):
+    """Create a simple button image with text"""
+    surface = pygame.Surface((width, height))
+    surface.fill(color)
+    pygame.draw.rect(surface, WHITE, (0, 0, width, height), 3)
+    button_font = pygame.font.SysFont('Futura', 30)
+    text_surf = button_font.render(text, True, WHITE)
+    text_rect = text_surf.get_rect(center=(width//2, height//2))
+    surface.blit(text_surf, text_rect)
+    return surface
+
+resume_img = create_button_image('RESUME', 200, 60, (50, 150, 50))
+menu_exit_img = create_button_image('EXIT', 200, 60, (150, 50, 50))
 
 #background
 pine1_img = pygame.image.load('img/Background/pine1.png').convert_alpha()
@@ -90,13 +123,60 @@ WHITE=(255,255,255)
 GREEN=(0,255,0)
 BLACK=(0,0,0)
 PINK = (235, 65, 54)
+YELLOW = (255, 255, 0)
+ORANGE = (255, 165, 0)
 
 #define font
 font=pygame.font.SysFont('Futura', 24)
+small_font=pygame.font.SysFont('Futura', 18)
+title_font=pygame.font.SysFont('Futura', 36)
 
 def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
     screen.blit(img, (x, y))
+
+def draw_controls_hud():
+    """Display game controls on screen"""
+    hud_alpha = 180  # semi-transparent background
+    hud_surface = pygame.Surface((220, 160))
+    hud_surface.set_alpha(hud_alpha)
+    hud_surface.fill((0, 0, 0))
+    screen.blit(hud_surface, (SCREEN_WIDTH - 230, 10))
+    
+    # Draw control instructions
+    y_offset = 20
+    draw_text('CONTROLS:', small_font, WHITE, SCREEN_WIDTH - 220, y_offset)
+    y_offset += 25
+    draw_text('A/D: Move', small_font, WHITE, SCREEN_WIDTH - 220, y_offset)
+    y_offset += 22
+    draw_text('W: Jump', small_font, WHITE, SCREEN_WIDTH - 220, y_offset)
+    y_offset += 22
+    draw_text('SPACE: Shoot', small_font, WHITE, SCREEN_WIDTH - 220, y_offset)
+    y_offset += 22
+    draw_text('E: Grenade', small_font, WHITE, SCREEN_WIDTH - 220, y_offset)
+    y_offset += 22
+    draw_text('P: Pause', small_font, WHITE, SCREEN_WIDTH - 220, y_offset)
+    y_offset += 22
+    draw_text('ESC: Quit', small_font, WHITE, SCREEN_WIDTH - 220, y_offset)
+
+def draw_pause_menu():
+    """Draw the pause menu overlay"""
+    # Semi-transparent overlay
+    overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    overlay.set_alpha(200)
+    overlay.fill((0, 0, 0))
+    screen.blit(overlay, (0, 0))
+    
+    # Draw pause text
+    draw_text('GAME PAUSED', title_font, YELLOW, SCREEN_WIDTH // 2 - 140, 100)
+    
+    # Draw cheat status if active
+    if cheat_active:
+        draw_text('⚡ GOD MODE ACTIVE ⚡', font, GREEN, SCREEN_WIDTH // 2 - 120, 180)
+    
+    # Draw instructions
+    draw_text('Press P to Resume', font, WHITE, SCREEN_WIDTH // 2 - 110, SCREEN_HEIGHT // 2 - 50)
+    draw_text('Press ESC to Exit', font, WHITE, SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 50)
 
 def draw_bg():
     screen.fill(BG)
@@ -109,6 +189,7 @@ def draw_bg():
 
 #function to reset level
 def reset_level():
+    """Clear all sprite groups and return empty world data"""
     enemy_group.empty()
     bullet_group.empty()
     grenade_group.empty()
@@ -124,6 +205,41 @@ def reset_level():
         r = [-1] * COLS
         data.append(r)
     return data
+
+def reset_game_state():
+    """Reset game state variables for new game"""
+    global score, enemies_killed, level, bg_scroll, start_intro, cheat_active, cheat_input
+    score = 0
+    enemies_killed = 0
+    level = 1
+    bg_scroll = 0
+    start_intro = True
+    cheat_active = False
+    cheat_input = ""
+
+def check_cheat_code(new_char):
+    """Check if cheat code has been entered"""
+    global cheat_input, cheat_active
+    cheat_input += new_char.lower()
+    
+    # Keep only the last characters needed
+    if len(cheat_input) > len(CHEAT_CODE):
+        cheat_input = cheat_input[-len(CHEAT_CODE):]
+    
+    # Check if cheat code matches
+    if cheat_input == CHEAT_CODE:
+        cheat_active = True
+        cheat_input = ""  # Reset after activation
+        return True
+    return False
+
+def draw_cheat_notification():
+    """Show notification when cheat is active"""
+    if cheat_active:
+        # Draw flashing notification
+        if pygame.time.get_ticks() % 1000 < 500:  # Flash every 500ms
+            draw_text('⚡ GOD MODE ⚡', font, YELLOW, SCREEN_WIDTH // 2 - 80, 10)
+            draw_text('Infinite Health & Ammo', small_font, GREEN, SCREEN_WIDTH // 2 - 90, 40)
 
 class Soldier(pygame.sprite.Sprite):
     def __init__(self, char_type, x, y, scale, speed, ammo, grenade):
@@ -148,7 +264,7 @@ class Soldier(pygame.sprite.Sprite):
         self.update_time = pygame.time.get_ticks()
         #create ai speciffic variables
         self.move_counter = 0
-        self.vision = pygame.Rect(0, 0, 150, 20)
+        self.vision = pygame.Rect(0, 0, ENEMY_DETECTION_RANGE, 20)
         self.idling = False
         self.idling_counter = 0
     
@@ -199,7 +315,7 @@ class Soldier(pygame.sprite.Sprite):
 
         #jump
         if self.jump == True and self.in_air == False:
-            self.vel_y = -12
+            self.vel_y = PLAYER_JUMP_VELOCITY
             self.jump = False
             self.in_air = True
 
@@ -265,12 +381,20 @@ class Soldier(pygame.sprite.Sprite):
 
 
     def shoot(self):
-        if self.shoot_cooldown == 0 and self.ammo > 0:
-            self.shoot_cooldown = 20
+        # Check ammo (or if cheat is active for player)
+        has_ammo = self.ammo > 0 or (cheat_active and self.char_type == 'player')
+        
+        if self.shoot_cooldown == 0 and has_ammo:
+            # Use player-specific cooldown if player, else use default
+            if self.char_type == 'player':
+                self.shoot_cooldown = PLAYER_SHOOT_COOLDOWN
+            else:
+                self.shoot_cooldown = 20
             bullet=Bullet(self.rect.centerx+(0.75*self.rect.size[0]*self.direction), self.rect.centery, self.direction, self.char_type)
             bullet_group.add(bullet)
-            #reduce ammo
-            self.ammo -= 1
+            #reduce ammo (unless cheat is active for player)
+            if not (cheat_active and self.char_type == 'player'):
+                self.ammo -= 1
             shoot_fx.play()
 
 
@@ -307,7 +431,7 @@ class Soldier(pygame.sprite.Sprite):
                     self.update_action(1)#1: run
                     self.move_counter += 1
                     #update ai vision as the enemy moves
-                    self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
+                    self.vision.center = (self.rect.centerx + (ENEMY_DETECTION_RANGE // 2) * self.direction, self.rect.centery)
                     #check if the ai has hit a wall or water tile
                     if pygame.sprite.spritecollide(self, water_group, False):
                         self.direction *= -1
@@ -318,7 +442,7 @@ class Soldier(pygame.sprite.Sprite):
                             self.move_counter = 0
                             
                     #update ai vision as the enemy moves
-                    self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
+                    self.vision.center = (self.rect.centerx + (ENEMY_DETECTION_RANGE // 2) * self.direction, self.rect.centery)
 
                     if self.move_counter > TILE_SIZE:
                         self.direction *= -1
@@ -359,6 +483,11 @@ class Soldier(pygame.sprite.Sprite):
             self.update_time = pygame.time.get_ticks()
 
     def check_alive(self):
+        # God mode for player when cheat is active
+        if cheat_active and self.char_type == 'player':
+            if self.health < self.max_health:
+                self.health = self.max_health
+        
         if self.health <= 0:
             self.health = 0
             self.speed = 0
@@ -400,7 +529,7 @@ class World():
                         decoration_group.add(decoration)
                     elif tile == 15 : #create player
                         # Use self.player and self.health_bar instead of local variables
-                        self.player = Soldier('player', x * TILE_SIZE, y * TILE_SIZE, 1.65, 5, 20, 5)
+                        self.player = Soldier('player', x * TILE_SIZE, y * TILE_SIZE, 1.65, PLAYER_SPEED, 20, 5)
                         self.health_bar = HealthBar(10, 10, self.player.health, self.player.health )
                     elif tile == 16:#create enemies
                         enemy = Soldier('enemy', x * TILE_SIZE, y * TILE_SIZE, 1.65, 2, 20, 0)
@@ -419,7 +548,7 @@ class World():
                         exit_group.add(exit)
         # If no player was created from level data, create a default one
         if not self.player:
-            self.player = Soldier('player', 100, 100, 1.65, 5, 20, 5)
+            self.player = Soldier('player', 100, 100, 1.65, PLAYER_SPEED, 20, 5)
             self.health_bar = HealthBar(10, 10, self.player.health, self.player.health)
         # REMOVE the return statement
         # return player, health_bar
@@ -466,10 +595,18 @@ class ItemBox(pygame.sprite.Sprite):
         self.image = item_boxes[self.item_type]
         self.rect = self.image.get_rect()
         self.rect.midtop = (x + TILE_SIZE // 2, y + (TILE_SIZE - self.image.get_height()))
+        self.original_y = self.rect.y
+        self.bob_counter = 0  # For bobbing animation
 
     def update(self):
+        global score
         #scroll
         self.rect.x += screen_scroll
+        
+        # Add subtle bobbing animation
+        self.bob_counter += 0.1
+        self.rect.y = self.original_y + int(5 * abs(pygame.math.Vector2(0, 1).rotate(self.bob_counter * 10).y))
+        
         #check if the player has picked up the box
         if pygame.sprite.collide_rect(self, player):
             #check what kind of box it was
@@ -477,10 +614,13 @@ class ItemBox(pygame.sprite.Sprite):
                 player.health += 25
                 if player.health > player.max_health:
                     player.health = player.max_health
+                score += 10  # Bonus points for health pickup
             elif self.item_type == 'Ammo':
                 player.ammo += 15
+                score += 5  # Bonus points for ammo pickup
             elif self.item_type == 'Grenade':
                 player.grenade += 3
+                score += 15  # Bonus points for grenade pickup
             #delete the box
             self.kill()
 
@@ -495,27 +635,39 @@ class HealthBar():
         self.health=health
         #calculate health ratio
         ratio = self.health / self.max_health
+        # Determine color based on health percentage
+        if ratio > 0.6:
+            bar_color = GREEN
+        elif ratio > 0.3:
+            bar_color = ORANGE
+        else:
+            bar_color = RED
         pygame.draw.rect(screen, BLACK, (self.x-2, self.y-2, 154, 24))
         pygame.draw.rect(screen, RED, (self.x, self.y, 150, 20))
-        pygame.draw.rect(screen, GREEN, (self.x, self.y, 150 * ratio, 20))
+        pygame.draw.rect(screen, bar_color, (self.x, self.y, 150 * ratio, 20))
+        # Draw health text
+        draw_text(f'{int(self.health)}/{int(self.max_health)}', small_font, WHITE, self.x + 165, self.y - 2)
         
 
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, direction, owner):
         pygame.sprite.Sprite.__init__(self)
-        self.speed = 10
+        self.speed = 12  # Increased bullet speed
         self.image = bullet_img
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.direction = direction
         self.owner = owner
+        self.lifetime = 0  # Track how long bullet has existed
 
     def update(self):
         #move bullet
         self.rect.x += (self.direction * self.speed) + screen_scroll
-        #check if bullet has gone off screen
-        if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
+        self.lifetime += 1
+        
+        #check if bullet has gone off screen or existed too long
+        if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH or self.lifetime > 100:
             self.kill()
         #check for collision with level
         for tile in world.obstacle_list:
@@ -532,7 +684,13 @@ class Bullet(pygame.sprite.Sprite):
             for enemy in enemy_group:
                 if pygame.sprite.spritecollide(enemy, bullet_group, False):
                     if enemy.alive:
+                        was_alive = enemy.alive
                         enemy.health -= 25
+                        # Award points if enemy was killed
+                        if was_alive and enemy.health <= 0:
+                            global score, enemies_killed
+                            score += 100
+                            enemies_killed += 1
                         self.kill()
         
 class Grenade(pygame.sprite.Sprite):
@@ -592,7 +750,13 @@ class Grenade(pygame.sprite.Sprite):
             for enemy in enemy_group:
                 if abs(self.rect.centerx - enemy.rect.centerx) < TILE_SIZE * 2 and \
                     abs(self.rect.centery - enemy.rect.centery) < TILE_SIZE * 2:
+                    was_alive = enemy.alive
                     enemy.health -= 50
+                    # Award points for grenade kill
+                    if was_alive and enemy.health <= 0:
+                        global score, enemies_killed
+                        score += 150  # More points for grenade kills
+                        enemies_killed += 1
 
 
 
@@ -711,6 +875,25 @@ while run:
     if start_game == False:
         #draw menu
         screen.fill(BG)
+        draw_bg()
+        
+        # Draw title
+        draw_text('WAR GRIDS', title_font, WHITE, SCREEN_WIDTH // 2 - 120, 50)
+        draw_text('Platform Shooter Game', font, WHITE, SCREEN_WIDTH // 2 - 130, 100)
+        
+        # Draw controls info
+        y_start = 180
+        draw_text('=== CONTROLS ===', font, YELLOW, SCREEN_WIDTH // 2 - 100, y_start)
+        draw_text('A / D : Move Left/Right', small_font, WHITE, SCREEN_WIDTH // 2 - 100, y_start + 35)
+        draw_text('W : Jump', small_font, WHITE, SCREEN_WIDTH // 2 - 40, y_start + 60)
+        draw_text('SPACE : Shoot', small_font, WHITE, SCREEN_WIDTH // 2 - 60, y_start + 85)
+        draw_text('E : Throw Grenade', small_font, WHITE, SCREEN_WIDTH // 2 - 75, y_start + 110)
+        draw_text('P : Pause/Resume', small_font, WHITE, SCREEN_WIDTH // 2 - 80, y_start + 135)
+        draw_text('ESC : Exit Game', small_font, WHITE, SCREEN_WIDTH // 2 - 70, y_start + 160)
+        
+        # Draw hint about cheat
+        draw_text('💡 Tip: Type secret words during gameplay...', small_font, ORANGE, SCREEN_WIDTH // 2 - 180, y_start + 200)
+        
         #add buttons
         if start_button.draw(screen):
             start_game = True
@@ -725,31 +908,61 @@ while run:
         #show health bar
         health_bar.draw(player.health)
 
-        #show ammo
-        draw_text('Ammo:', font, WHITE, 10, 35)
-        for x in range(player.ammo):
-            screen.blit(bullet_img,(90 + (x * 10),40))
-        #show grenades
-        draw_text(f'Grenades:', font, WHITE, 10, 60)
-        for x in range(player.grenade):
-            screen.blit(grenade_img,(135 + (x * 15),60))
-
+        #show ammo with number (or infinity if cheat active)
+        draw_text('AMMO:', font, WHITE, 10, 35)
+        if cheat_active:
+            draw_text('∞', font, GREEN, 100, 35)
+        else:
+            draw_text(str(player.ammo), font, YELLOW if player.ammo > 5 else RED, 100, 35)
         
-        player.update()
-        player.draw()
-        for enemy in enemy_group:
-            enemy.ai()
-            enemy.update()
-            enemy.draw()
+        #show grenades with number (or infinity if cheat active)
+        draw_text('GRENADES:', font, WHITE, 10, 60)
+        if cheat_active:
+            draw_text('∞', font, GREEN, 150, 60)
+        else:
+            draw_text(str(player.grenade), font, YELLOW if player.grenade > 0 else RED, 150, 60)
+        
+        #show level number
+        draw_text(f'LEVEL: {level}', font, WHITE, 10, 85)
+        
+        #show enemy count
+        enemy_count = len(enemy_group)
+        draw_text(f'ENEMIES: {enemy_count}', font, RED if enemy_count > 0 else GREEN, 10, 110)
+        
+        #show score
+        draw_text(f'SCORE: {score}', font, YELLOW, 10, 135)
+        draw_text(f'KILLS: {enemies_killed}', font, WHITE, 10, 160)
+        
+        #draw controls HUD
+        draw_controls_hud()
+        
+        #draw cheat notification
+        draw_cheat_notification()
 
-        #update and draw groups
-        bullet_group.update()
-        grenade_group.update()
-        explosion_group.update()
-        item_box_group.update()
-        decoration_group.update()
-        water_group.update()
-        exit_group.update()
+        # Only update game if not paused
+        if not game_paused:
+            player.update()
+        player.draw()
+        
+        if not game_paused:
+            for enemy in enemy_group:
+                enemy.ai()
+                enemy.update()
+                enemy.draw()
+
+            #update and draw groups
+            bullet_group.update()
+            grenade_group.update()
+            explosion_group.update()
+            item_box_group.update()
+            decoration_group.update()
+            water_group.update()
+            exit_group.update()
+        else:
+            # Still draw enemies and groups when paused
+            for enemy in enemy_group:
+                enemy.draw()
+        
         bullet_group.draw(screen)
         grenade_group.draw(screen)
         explosion_group.draw(screen)
@@ -759,24 +972,26 @@ while run:
         exit_group.draw(screen)
 
         #show intro
-        if start_intro == True:
+        if start_intro == True and not game_paused:
             if intro_fade.fade():
                 start_intro = False
                 intro_fade.fade_counter=0
             
 
-        #update player actions
-        if player.alive:
+        #update player actions (only if not paused)
+        if player.alive and not game_paused:
             #shoot bullets
             if shoot:
                 player.shoot()
             #throw grenades
-            elif grenade and grenade_thrown ==False and player.grenade > 0:
+            has_grenades = player.grenade > 0 or cheat_active
+            if grenade and grenade_thrown == False and has_grenades:
                 grenade=Grenade(player.rect.centerx + (0.5 * player.rect.size[0] * player.direction),\
                                 player.rect.top, player.direction)
                 grenade_group.add(grenade)
-                #reduce grenade
-                player.grenade -= 1
+                #reduce grenade (unless cheat is active)
+                if not cheat_active:
+                    player.grenade -= 1
                 grenade_thrown = True
 
             if player.in_air:
@@ -789,6 +1004,11 @@ while run:
             bg_scroll -= screen_scroll
             #check if player has completed the level
             if level_complete:
+                # Display level complete message
+                draw_text('LEVEL COMPLETE!', title_font, YELLOW, SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2 - 50)
+                pygame.display.update()
+                pygame.time.delay(1500)  # Show message for 1.5 seconds
+                
                 start_intro = True
                 level += 1
                 bg_scroll = 0
@@ -814,13 +1034,18 @@ while run:
                     world = World(world_data)
                     player = world.player
                     health_bar = world.health_bar
+                else:
+                    # All levels completed - Victory screen
+                    draw_text('CONGRATULATIONS!', title_font, YELLOW, SCREEN_WIDTH // 2 - 180, SCREEN_HEIGHT // 2 - 100)
+                    draw_text('You completed all levels!', font, WHITE, SCREEN_WIDTH // 2 - 140, SCREEN_HEIGHT // 2 - 40)
+                    draw_text('Press ESC to exit', font, WHITE, SCREEN_WIDTH // 2 - 110, SCREEN_HEIGHT // 2 + 20)
+                    pygame.display.update()
         else:
             screen_scroll = 0
             if death_fade.fade():
                 if restart_button.draw(screen):
                     death_fade.fade_counter=0
-                    start_intro = True
-                    bg_scroll = 0
+                    reset_game_state()
                     world_data = reset_level()
                     #load in level data and create world
                     try:
@@ -843,6 +1068,9 @@ while run:
                     player = world.player
                     health_bar = world.health_bar
 
+        # Draw pause menu overlay if paused
+        if game_paused:
+            draw_pause_menu()
 
     for event in pygame.event.get():
         #quit game
@@ -850,32 +1078,46 @@ while run:
             run = False
         #keyboard presses
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_a:
-                moving_left = True
-            if event.key == pygame.K_d:
-                moving_right = True
-            if event.key == pygame.K_SPACE:
-                shoot = True
-            if event.key == pygame.K_q:
-                grenade = True
-            if event.key == pygame.K_w and player.alive:
-                player.jump = True
-                jump_fx.play()
+            # Pause toggle (only when game is running)
+            if event.key == pygame.K_p and start_game:
+                game_paused = not game_paused
+            
+            # Handle input when NOT paused
+            if not game_paused:
+                if event.key == pygame.K_a:
+                    moving_left = True
+                if event.key == pygame.K_d:
+                    moving_right = True
+                if event.key == pygame.K_SPACE:
+                    shoot = True
+                if event.key == pygame.K_e:
+                    grenade = True
+                if event.key == pygame.K_w and player.alive:
+                    player.jump = True
+                    jump_fx.play()
+                
+                # Cheat code detection - check for letter keys
+                if event.unicode.isalpha() and start_game:
+                    if check_cheat_code(event.unicode):
+                        # Show activation message
+                        print("🔥 CHEAT ACTIVATED: God Mode Enabled! 🔥")
+            
             if event.key == pygame.K_ESCAPE:
                 run = False
 
 
         #keyboard button released
         if event.type == pygame.KEYUP:
-            if event.key == pygame.K_a:
-                moving_left = False
-            if event.key == pygame.K_d:
-                moving_right = False
-            if event.key == pygame.K_SPACE:
-                shoot = False
-            if event.key == pygame.K_q:
-                grenade = False
-                grenade_thrown = False
+            if not game_paused:
+                if event.key == pygame.K_a:
+                    moving_left = False
+                if event.key == pygame.K_d:
+                    moving_right = False
+                if event.key == pygame.K_SPACE:
+                    shoot = False
+                if event.key == pygame.K_e:
+                    grenade = False
+                    grenade_thrown = False
 
 
     pygame.display.update()

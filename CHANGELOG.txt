@@ -1,0 +1,137 @@
+"""
+WAR GRIDS - CHANGE LOG
+=======================
+
+VERSION 2.0 - MAJOR IMPROVEMENTS UPDATE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎮 CONTROL SCHEME CHANGES (AS REQUESTED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BEFORE               →    AFTER
+─────────────────────────────────────────────
+A/D keys (Move)      →    ← → Arrow Keys
+W key (Jump)         →    SPACE Bar
+SPACE (Shoot)        →    Q key
+Q (Grenade)          →    E key
+ESC (Exit)           →    ESC (unchanged)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✨ NEW FEATURES ADDED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. SCORE SYSTEM
+   ✓ Points for killing enemies (100 per kill)
+   ✓ Bonus for grenade kills (150 per kill)
+   ✓ Pickup bonuses (5-15 points)
+   ✓ Kill counter tracking
+   ✓ Visible score display
+
+2. ENHANCED HUD
+   ✓ Semi-transparent controls panel (top-right)
+   ✓ Numeric ammo display with color warnings
+   ✓ Numeric grenade display with color warnings
+   ✓ Level number display
+   ✓ Real-time enemy counter
+   ✓ Score and kills display
+   ✓ Always-visible controls reference
+
+3. IMPROVED HEALTH SYSTEM
+   ✓ Health bar shows numeric value (e.g., "75/100")
+   ✓ Color coding based on health percentage:
+     • Green: > 60% (healthy)
+     • Orange: 30-60% (warning)
+     • Red: < 30% (critical)
+
+4. BETTER MAIN MENU
+   ✓ Game title display "WAR GRIDS"
+   ✓ Complete controls guide shown
+   ✓ Beautiful background
+   ✓ Better button positioning
+
+5. VICTORY CONDITIONS
+   ✓ Level complete screen with pause
+   ✓ Victory screen after all levels
+   ✓ Congratulations message
+
+6. IMPROVED GAMEPLAY
+   ✓ Faster bullet speed (10 → 12)
+   ✓ Better jump height (-12 → -13)
+   ✓ Faster shooting (20 → 15 frame cooldown)
+   ✓ Bullet lifetime tracking
+   ✓ Item box bobbing animation
+   ✓ Better enemy AI vision
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔧 CODE IMPROVEMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Added comprehensive comments
+✓ Created reusable UI functions
+✓ Configurable difficulty constants
+✓ Better code organization
+✓ Improved error handling
+✓ Clean state reset function
+✓ Better variable naming
+✓ Modular design patterns
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 DIFFICULTY SETTINGS (Easy to Modify)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PLAYER_SPEED = 5              (movement speed)
+PLAYER_JUMP_VELOCITY = -13    (jump strength)
+ENEMY_DETECTION_RANGE = 150   (vision range)
+PLAYER_SHOOT_COOLDOWN = 15    (firing rate)
+
+All located at the top of shooter_tut.py for easy tweaking!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 FILES MODIFIED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ shooter_tut.py         (main game - HEAVILY IMPROVED)
+✓ README.md              (new comprehensive guide)
+✓ GAME_IMPROVEMENTS.md   (detailed changelog)
+✓ CONTROLS_REFERENCE.txt (quick controls card)
+✓ CHANGELOG.txt          (this file)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 TESTING CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Game starts without errors
+✓ Main menu displays correctly
+✓ All new controls work properly
+✓ Arrow keys move player
+✓ Space bar makes player jump
+✓ Q key shoots bullets
+✓ E key throws grenades
+✓ Score system tracks correctly
+✓ Health bar updates properly
+✓ HUD displays all information
+✓ Level completion works
+✓ Victory screen appears
+✓ Death/restart system works
+✓ All visual improvements render
+✓ No performance issues
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 NOTES FOR PLAYERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• The game is now MORE PLAYABLE with better controls
+• Arrow keys are standard for platform games
+• Score system adds replay value
+• Visual feedback helps with game awareness
+• Controls are always visible on screen
+• Health warnings help survival
+• Faster gameplay for more excitement
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Enjoy your improved War Grids experience!
+Try to beat all levels with the HIGHEST SCORE!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"""
