@@ -5,14 +5,9 @@ from sprites import Soldier, ItemBox
 from ui import HealthBar
 
 class World():
-    def __init__(self, data):
-        self.obstacle_list = []
-        self.player = None
-        self.health_bar = None
-        self.process_data(data)
-
     def process_data(self, data, enemy_group, item_box_group, water_group, decoration_group, exit_group):
         self.level_length = len(data[0])
+        self.obstacle_list = []
         for y, row in enumerate(data):
             for x, tile in enumerate(row):
                 if tile >= 0:
