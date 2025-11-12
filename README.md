@@ -1,173 +1,104 @@
-# War Grids - Platform Shooter Game
+# War Grids - A 2D Platform Shooter
 
-A Python-based 2D platform shooter game built with Pygame featuring multiple levels, enemies, collectibles, and an engaging combat system.
+War Grids is a fast-paced 2D platform shooter built with Pygame. It features multiple levels, a variety of enemies, and a classic arcade feel. This project has been refactored for better performance, readability, and modularity, making it an excellent starting point for anyone looking to build their own 2D shooter.
 
-## 🎮 How to Run
+## 🚀 Getting Started
+
+Follow these instructions to get the game up and running on your local machine.
+
+### Prerequisites
+
+You'll need to have Python and `pip` installed. You can download them from the official Python website.
+
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd <repository-name>
+    ```
+2.  **Install Pygame:**
+    ```bash
+    pip install pygame
+    ```
+
+### Running the Game
+
+To start the game, run the `main.py` script from the `src` directory:
 
 ```bash
-python shooter_tut.py
+python3 src/main.py
 ```
 
-Make sure you have Pygame installed:
-```bash
-pip install pygame
-```
+## 🎮 Gameplay
 
-## 🕹️ Game Controls
+### Controls
 
-| Action | Key |
-|--------|-----|
-| Move Left | ← (Left Arrow) |
-| Move Right | → (Right Arrow) |
-| Jump | SPACE |
-| Shoot | Q |
-| Throw Grenade | E |
-| Exit Game | ESC |
+| Action          | Key              |
+| --------------- | ---------------- |
+| **Move Left**   | `A` or `←` (Left Arrow) |
+| **Move Right**  | `D` or `→` (Right Arrow) |
+| **Jump**        | `W` or `↑` (Up Arrow) |
+| **Shoot**       | `Spacebar`       |
+| **Throw Grenade** | `E`              |
+| **Pause/Resume**| `P`              |
+| **Exit Game**   | `ESC`            |
 
-## 📊 Features
+### Objective
 
-### Gameplay
-- **3 Challenging Levels** with increasing difficulty
-- **Smart Enemy AI** that detects and attacks the player
-- **Combat System** with guns and grenades
-- **Collectible Items**: Health boxes, ammo crates, and grenades
-- **Environmental Hazards**: Water tiles (instant death)
-- **Score System** tracking kills and pickups
-- **Level Progression** with fade effects
+The goal of each level is to eliminate all the enemies and reach the exit. As you progress, the levels will become more challenging, with more enemies and trickier platforming.
 
-### Visual Elements
-- **Dynamic Parallax Background** with mountains and trees
-- **Smooth Animations** for idle, run, jump, and death
-- **Health Bar** with color-coded warning system
-- **Real-time HUD** showing:
-  - Health (with percentage colors)
-  - Ammo count
-  - Grenade count
-  - Current level
-  - Enemy count
-  - Score and kills
-  - Controls reference panel
+### Scoring
 
-### Game Mechanics
-- **Physics-based Movement** with gravity
-- **Scrolling Levels** that follow the player
-- **Collision Detection** for terrain, bullets, and grenades
-- **Explosion Effects** from grenades
-- **Item Animations** with bobbing effect
-- **Victory/Death Screens** with restart option
+You'll earn points for various actions in the game:
 
-## 🎯 Scoring
+| Action             | Points |
+| ------------------ | ------ |
+| **Enemy Kill**     | `100`  |
+| **Grenade Kill**   | `150`  |
+| **Health Pickup**  | `10`   |
+| **Ammo Pickup**    | `5`    |
+| **Grenade Pickup** | `15`   |
 
-- **Enemy Kill** (bullet): 100 points
-- **Enemy Kill** (grenade): 150 points  
-- **Health Pickup**: +10 points
-- **Ammo Pickup**: +5 points
-- **Grenade Pickup**: +15 points
+## ✨ Features
 
-## 🎨 Game Assets
+*   **Modular Codebase:** The project has been refactored into a clean, easy-to-understand structure, making it perfect for learning and extending.
+*   **Performance Optimized:** Assets are pre-loaded to ensure smooth, lag-free gameplay.
+*   **Dynamic Gameplay:** Features include a variety of enemies, collectible items (health, ammo, grenades), and environmental hazards.
+*   **Particle Effects:** Visual flair is added with particle effects for bullet impacts.
+*   **Cheat Codes:** For a little extra fun, a "God Mode" cheat code is included (`thor`).
 
-The game uses the following asset directories:
-- `img/player/` - Player character animations
-- `img/enemy/` - Enemy character animations
-- `img/background/` - Background layers
-- `img/tile/` - Level tiles (21 types)
-- `img/icons/` - UI elements and items
-- `img/explosion/` - Explosion animation frames
-- `audio/` - Sound effects and music
+## 📂 Project Structure
+
+The project has been refactored to follow a modular structure, making it easy to navigate and maintain. All the game's source code is located in the `src` directory.
+
+| File / Directory   | Description                                                                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **`src/`**         | The main directory for all the game's source code.                                                                                        |
+| `├── main.py`      | The entry point of the game. It manages the main game loop, handles top-level events, and orchestrates the different game modules.         |
+| `├── settings.py`  | A centralized configuration file that contains all the game's constants, such as screen dimensions, colors, gravity, and player speed.     |
+| `├── assets.py`    | Responsible for loading all the game's assets (images, sounds) at the start of the game. This pre-loading strategy improves performance. |
+| `├── sprites.py`   | Contains all the game's sprite classes, including `Soldier`, `Bullet`, `Grenade`, `Explosion`, `ItemBox`, and `Particle`.                    |
+| `├── world.py`     | Manages the game world, including the `World` class and other environment-related classes like `Decoration`, `Water`, and `Exit`.         |
+| `├── ui.py`        | Contains all the UI elements, such as the `HealthBar`, `Button` class, and text-drawing functions.                                        |
+| **`img/`**         | A directory containing all the game's images, organized into subdirectories for background, enemies, icons, player, and tiles.            |
+| **`audio/`**       | Contains all the game's sound effects and music.                                                                                        |
+| **`level_data/`**  | CSV files that define the layout of each level.                                                                                          |
 
 ## 🛠️ Level Editor
 
-Use `level_editor_tut.py` to create custom levels:
-- Place tiles by clicking
-- Save/Load level data
-- 21 different tile types including:
-  - Terrain blocks
-  - Water hazards
-  - Decorations
-  - Player spawn
-  - Enemy spawn
-  - Item boxes
-  - Level exit
+This project includes a simple, easy-to-use level editor that allows you to create your own custom levels for the game.
 
-## 📝 Files
+### How to Use
 
-- `shooter_tut.py` - Main game file (IMPROVED VERSION)
-- `level_editor_tut.py` - Level editor tool
-- `button.py` - Button UI class
-- `menu.py` - Menu system example
-- `level0_data.csv` through `level3_data.csv` - Level data
-- `GAME_IMPROVEMENTS.md` - Detailed list of improvements
-- `CONTROLS_REFERENCE.txt` - Quick controls reference
-
-## 🎮 Gameplay Tips
-
-1. **Conserve Ammo**: You start with limited ammo - pick up ammo boxes!
-2. **Use Grenades Wisely**: They deal massive damage and give bonus points
-3. **Watch Your Health**: The health bar changes color as a warning
-4. **Explore Levels**: Find all item boxes for maximum score
-5. **Strategic Shooting**: Enemies can shoot back - take cover behind blocks
-6. **Jump Carefully**: Falling in water means instant death
-7. **Kill All Enemies**: Clear each area before proceeding
-
-## 🔧 Customization
-
-Easy-to-modify difficulty settings in `shooter_tut.py`:
-
-```python
-PLAYER_SPEED = 5              # Movement speed (1-10)
-PLAYER_JUMP_VELOCITY = -13    # Jump height (higher negative = higher jump)
-ENEMY_DETECTION_RANGE = 150   # Enemy vision (in pixels)
-PLAYER_SHOOT_COOLDOWN = 15    # Shooting speed (lower = faster)
-```
-
-## 🚀 What's New (Latest Update)
-
-### ✅ Changed Controls
-- Movement now uses **Arrow Keys** instead of A/D
-- Jump changed from W to **SPACE**
-- Shoot changed from SPACE to **Q**
-- Grenade changed from Q to **E**
-
-### ✅ Gameplay Improvements
-- Added comprehensive **score system**
-- **Health bar** now shows numeric values with color coding
-- **Better bullet speed** and lifetime tracking
-- **Item boxes animate** with bobbing effect
-- **Improved jumping** mechanics
-- **Faster shooting** cooldown
-
-### ✅ Visual Improvements
-- **Enhanced main menu** with full controls display
-- **In-game controls panel** (semi-transparent, top-right)
-- **Level complete screen** with pause
-- **Victory screen** after beating all levels
-- **Color-coded warnings** for low resources
-- **Real-time enemy counter**
-
-### ✅ Code Quality
-- Better organized with clear comments
-- Reusable UI functions
-- Configurable difficulty constants
-- Improved game state management
-- Clean reset functionality
-
-## 🐛 Known Issues
-
-None at this time! The game has been tested and all systems are working correctly.
-
-## 📄 License
-
-This is an educational project. Feel free to modify and learn from it!
-
-## 🤝 Contributing
-
-This is a learning project. Feel free to:
-- Add new levels
-- Create new enemy types
-- Add power-ups
-- Improve graphics
-- Add sound effects
-
----
-
-**Have fun playing War Grids! Try to beat all 3 levels with the highest score possible! 🎮**
+1.  **Run the Level Editor:**
+    ```bash
+    python3 level_editor.py
+    ```
+2.  **Create Your Level:**
+    *   Click on the tiles in the right-hand panel to select them.
+    *   Click on the main grid to place the selected tile.
+    *   To erase, select the "Eraser" tile (the empty one).
+3.  **Save/Load:**
+    *   Use the "Save" and "Load" buttons to save your creations and load them back in for further editing.
+    *   Levels are saved as `.csv` files, which the game can read directly.
