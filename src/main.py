@@ -1,20 +1,20 @@
-import pygame
-from pygame import mixer
 import os
 import random
 import csv
+import pygame
+from pygame import mixer
+
+# Set working directory to project root
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+os.chdir(project_root)
+
 from settings import *
 from assets import *
-from sprites import Soldier, Bullet, Grenade, Explosion, ItemBox
+from sprites import Soldier, Bullet, Grenade, Explosion, ItemBox, Particle
 from world import World, Decoration, Water, Exit
 from ui import HealthBar, ScreenFade, draw_text, draw_controls_hud, draw_pause_menu, draw_bg, draw_cheat_notification, Button
 
-mixer.init()
-pygame.init()
 
-
-
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Shooter')
 
 #set frame rate
@@ -138,8 +138,6 @@ except FileNotFoundError:
     world_data[ROWS-1][COLS-1] = 20
     # Add an enemy
     world_data[ROWS-2][COLS-20] = 16
-    # Add shotgun box
-    world_data[ROWS-2][COLS-25] = 21
 
 
 world = World()
@@ -155,7 +153,7 @@ while run:
     if start_game == False:
         #draw menu
         screen.fill(BG)
-        draw_bg(screen, bg_scroll)
+        draw_bg(screen, bg_scroll, sky_img, mountain_img, pine1_img, pine2_img)
 
         # Draw title
         draw_text('WAR GRIDS', title_font, WHITE, SCREEN_WIDTH // 2 - 120, 50, screen)
@@ -182,7 +180,7 @@ while run:
             run = False
     else:
         #update background
-        draw_bg(screen, bg_scroll)
+        draw_bg(screen, bg_scroll, sky_img, mountain_img, pine1_img, pine2_img)
         #draw world map
         world.draw(screen, screen_scroll)
         #show health bar
@@ -228,6 +226,7 @@ while run:
             bullet_group.update(world, player, enemy_group, bullet_group, screen_scroll, score, enemies_killed, particle_group)
             grenade_group.update(world, player, enemy_group, explosion_group, screen_scroll, score, enemies_killed, screen_shake)
             explosion_group.update(screen_scroll)
+            particle_group.update(screen_scroll)
             item_box_group.update(player, screen_scroll, score)
             decoration_group.update(screen_scroll)
             water_group.update(screen_scroll)
@@ -306,8 +305,6 @@ while run:
                         world_data[ROWS - 1][COLS - 1] = 20
                         # Add an enemy
                         world_data[ROWS - 2][COLS - 20] = 16
-                        # Add shotgun box
-                        world_data[ROWS - 2][COLS - 25] = 21
                     world = World()
                     player, health_bar = world.process_data(world_data, enemy_group, item_box_group, water_group, decoration_group, exit_group)
                 else:
@@ -340,8 +337,6 @@ while run:
                         world_data[ROWS - 1][COLS - 1] = 20
                         # Add an enemy
                         world_data[ROWS-2][COLS-20] = 16
-                        # Add shotgun box
-                        world_data[ROWS-2][COLS-25] = 21
                     world = World()
                     player, health_bar = world.process_data(world_data, enemy_group, item_box_group, water_group, decoration_group, exit_group)
 
@@ -401,7 +396,7 @@ while run:
     if screen_shake > 0:
         screen_shake -= 1
         s = screen.copy()
-        draw_bg(screen, bg_scroll)
+        draw_bg(screen, bg_scroll, sky_img, mountain_img, pine1_img, pine2_img)
         screen.blit(s, (random.randint(-8, 8), random.randint(-8, 8)))
 
     pygame.display.update()

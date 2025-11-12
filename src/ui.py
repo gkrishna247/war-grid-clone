@@ -90,7 +90,7 @@ def draw_pause_menu(screen, title_font, font, cheat_active):
     draw_text('Press P to Resume', font, WHITE, SCREEN_WIDTH // 2 - 110, SCREEN_HEIGHT // 2 - 50, screen)
     draw_text('Press ESC to Exit', font, WHITE, SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 50, screen)
 
-def draw_bg(screen, bg_scroll):
+def draw_bg(screen, bg_scroll, sky_img, mountain_img, pine1_img, pine2_img):
     screen.fill(BG)
     width = sky_img.get_width()
     for x in range(5):
